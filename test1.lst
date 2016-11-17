@@ -1,0 +1,13 @@
+Input file: test1.ss
+   1: (car '(abc def ghi))
+   2: (cons 'abd '(1 2 3))
+   3: (cons 'a 'b)
+   4: (cons (car '(a b c d)) (cddr '(a b c d)))
+   5: (cons (cadr $(a b c d)) (caddr '(a ^ c d)))
+Error at 5,13: Invalid character found: $
+Error at 5,13: err in first set of stmt
+Error at 5,36: Invalid character found: ^
+Error at 5,36: err in follows of literal
+Error at 5,36: err in follows of statement
+   6: (cons (cadr '(a b c d)) (caddr '(a b c d)))
+2 errors found in input file

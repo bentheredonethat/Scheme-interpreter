@@ -1,0 +1,6 @@
+(car '(abc def ghi))
+(cons 'abd '(1 2 3))
+(cons 'a 'b)
+(cons (car '(a b c d)) (cddr '(a b c d)))
+(cons (cadr $(a b c d)) (caddr '(a ^ c d)))
+(cons (cadr '(a b c d)) (caddr '(a b c d)))

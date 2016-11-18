@@ -1,8 +1,0 @@
-(+ 4 5 2 7 5 2)
-(+ 4 5 2 7 5 2)
-(+ (* 2 2 2 2 2) (* 5 5))
-(cons '1 '2)
-(cons '(1 2 3) '(4 5 6)) 
-(cdr '(it rains every day))(cdr (cdr '(a b c d e f))) 
-(if (> n 0) (= n 10))
-(define pi 3.14)

@@ -1,3 +1,9 @@
+/********************************************************************************/
+/* Project: Project 2									*/
+/* Author: 			Ben Levinsky						*/
+/* Date: 	11/14/2016			*/
+/* Description:	implement lexical analysis on subset of scheme	*/
+/********************************************************************************/
 #include <iomanip>
 #include <cstdlib>
 #include "LexicalAnalyzer.h"
@@ -28,7 +34,7 @@ static int table [][19] =
 LexicalAnalyzer::LexicalAnalyzer (char * filename)
 {
 /********************************************************************************/
-/* This function will								*/
+/* This function will	init the stream to read the input and init the private vars							*/
 /********************************************************************************/
 	cout << "Input file: " << filename << endl;
 	string name = filename;
@@ -62,7 +68,7 @@ LexicalAnalyzer::LexicalAnalyzer (char * filename)
 LexicalAnalyzer::~LexicalAnalyzer ()
 {
 /********************************************************************************/
-/* This function will								*/
+/* This function will close the input and output streams								*/
 /********************************************************************************/
 	input.close ();
 	cout << errors << " errors found in input file\n";
@@ -75,7 +81,8 @@ LexicalAnalyzer::~LexicalAnalyzer ()
 token_type LexicalAnalyzer::GetToken ()
 {
 /********************************************************************************/
-/* This function will								*/
+/* This function will	get the next token in the input file.
+ if there is none then report error	*/
 /********************************************************************************/
 	static string valid = "acdrb0.()+-*/'=<>?";
 	while (isspace(line[pos]))
@@ -174,7 +181,7 @@ token_type LexicalAnalyzer::GetToken ()
 string LexicalAnalyzer::GetTokenName (token_type t) const
 {
 /********************************************************************************/
-/* This function will								*/
+/* This function will get string associated with token enum	*/
 /********************************************************************************/
 	return token_names [t];
 }
@@ -182,7 +189,7 @@ string LexicalAnalyzer::GetTokenName (token_type t) const
 string LexicalAnalyzer::GetLexeme () const
 {
 /********************************************************************************/
-/* This function will								*/
+/* This function will	return the current lexeme	*/
 /********************************************************************************/
 	return lexeme;
 }
@@ -190,7 +197,7 @@ string LexicalAnalyzer::GetLexeme () const
 void LexicalAnalyzer::ReportError (const string & msg)
 {
 /********************************************************************************/
-/* This function will								*/
+/* This function will send string to the output streams	*/
 /********************************************************************************/
 	listing << "Error at " << linenum << ',' << pos << ": " << msg << endl;
 	debug << "Error at " << linenum << ',' << pos << ": " << msg << endl;

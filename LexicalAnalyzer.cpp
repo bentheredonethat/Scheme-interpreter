@@ -71,7 +71,9 @@ LexicalAnalyzer::~LexicalAnalyzer ()
 /* This function will close the input and output streams								*/
 /********************************************************************************/
 	input.close ();
-	cout << errors << " errors found in input file\n";
+		
+	// if there are any lexical errors, report:	
+	if (errors) cout << errors << " lexical errors found in input file\n";
 	listing << errors << " errors found in input file\n";
 	listing.close();
 	debug << errors << " errors found in input file\n";

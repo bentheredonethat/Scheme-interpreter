@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <fstream>
 #include "LexicalAnalyzer.h"
+#include "SetLimits.h"
 #include "SyntacticalAnalyzer.h"
 
 using namespace std;
@@ -38,8 +39,8 @@ SyntacticalAnalyzer::SyntacticalAnalyzer (char * filename)
 	ElsePartFollowSet = ParamListFollowSet;
 	ActionFollowSet = ParamListFollowSet;
 
-
 	int errors = Program ();
+	cout << errors << " errors found in input file\n";
 
 }
 
@@ -49,6 +50,7 @@ SyntacticalAnalyzer::~SyntacticalAnalyzer ()
 /* This function will	deallocate lexer							*/
 /********************************************************************************/
 	delete lex;
+
 }
 
 int SyntacticalAnalyzer::Program ()
@@ -56,6 +58,7 @@ int SyntacticalAnalyzer::Program ()
 /********************************************************************************/
 /* This function will	evaluate if sequence of tokens conforms to program syntax							*/
 /********************************************************************************/
+	SetLimits();
 	lex->debug << "Program function called; current token is " << lex->GetTokenName(token) << endl;
 	int errors = 0;
 	// token should be in the firsts of program

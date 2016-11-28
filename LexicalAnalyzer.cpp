@@ -87,8 +87,8 @@ token_type LexicalAnalyzer::GetToken ()
  if there is none then report error	*/
 /********************************************************************************/
 	static string valid = "acdrb0.()+-*/'=<>?";
-	while (isspace(line[pos]))
-		if (++pos >= line.length())
+	while (isspace(line[pos]) || line[pos] == ';')		
+		if (line[pos] == ';' || ++pos >= line.length())
 		{
 			getline (input, line);
 			if (input.fail())
@@ -106,7 +106,7 @@ token_type LexicalAnalyzer::GetToken ()
 	{
 		char c = line[pos++];
 		lexeme += c;
-		if (isalpha(c) && (c != 'a' && c != 'c' && c != 'd' && c != 'r')) 
+		if (c == '_' || ( isalpha(c) && (c != 'a' && c != 'c' && c != 'd' && c != 'r'))) 
 			c = 'b';
 		else if (isdigit(c))
 			c = '0';

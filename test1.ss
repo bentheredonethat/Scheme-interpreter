@@ -11,7 +11,7 @@
 (cons '1 '2)
 (cons '(1 2 3) '(4 5 6)) 
 (cdr '(it rains every day))(cdr (cdr '(a b c d e f))) 
-(define (pi a)  (if (> n 0) (= n 10) (= n 1)))
+(define (pi a b c)  (if (> n 0) (= n 10) (= n 1)))
 (define (pi)  (if (> n 0) (= n 10) (= n 1)))
 (= n 10)
 ( and (= n 14) (+ 1 n) )

@@ -21,18 +21,20 @@ SyntacticalAnalyzer::SyntacticalAnalyzer (char * filename)
 /********************************************************************************/
 	lex = new LexicalAnalyzer (filename);
 	token = lex->GetToken();
+
+	// initialize first and follow sets of non-terminals
 	ProgramFirstSet = {LPAREN_T, SYMBOL_T, QUOTE_T , NUMLIT_T};
 	LiteralFirstSet = {NUMLIT_T, SYMBOL_T, QUOTE_T };
 	QuotedLiteralFirstSet = {NUMLIT_T, SYMBOL_T, LPAREN_T };
 	ActionFirstSet	= { SYMBOLP_T, NUMBERP_T, LISTOP_T, DEFINE_T ,SYMBOL_T,	IF_T , CAR_T, CDR_T, CONS_T , AND_T ,	OR_T ,	NOT_T ,	LISTP_T ,	ZEROP_T ,	NULLP_T ,	CHARP_T ,	STRINGP_T ,	PLUS_T ,	MINUS_T ,	DIV_T ,	MULT_T ,EQUALTO_T ,GT_T ,	LT_T ,GTE_T ,LTE_T };
-	StatementListFirstSet = ProgramFirstSet;
-	ParamListFirstSet = {SYMBOL_T };
-	ElsePartFirstSet = ProgramFirstSet;
-	StatementFirstSet = ProgramFirstSet;
+	StatementListFirstSet = {LPAREN_T , NUMLIT_T, SYMBOL_T , QUOTE_T , EOF_T , RPAREN_T };
+	ParamListFirstSet = {SYMBOL_T , RPAREN_T };
+	ElsePartFirstSet = {LPAREN_T, NUMLIT_T, SYMBOL_T, QUOTE_T , RPAREN_T };
+	StatementFirstSet = {LPAREN_T , NUMLIT_T , SYMBOL_T, QUOTE_T };
 
 
 	StatmentFollowSet = {RPAREN_T, EOF_T, LPAREN_T, NUMLIT_T, SYMBOL_T , QUOTE_T };
-	LiteralFollowSet = StatmentFollowSet;
+	LiteralFollowSet = { RPAREN_T  ,    LPAREN_T ,      NUMLIT_T   ,   SYMBOL_T    ,  QUOTE_T ,EOF_T };
 	QuotedLiteralFollowSet = {RPAREN_T, EOF_T, LPAREN_T, NUMLIT_T, SYMBOL_T , QUOTE_T };
 	StatementListFollowSet = {RPAREN_T , EOF_T};
 	ParamListFollowSet = {RPAREN_T };
@@ -61,24 +63,20 @@ int SyntacticalAnalyzer::Program ()
 	SetLimits();
 	lex->debug << "Program function called; current token is " << lex->GetTokenName(token) << endl;
 	int errors = 0;
-	// token should be in the firsts of program
-	// if true... keep going
-
-	// if false...
+	
+	// check if current token is in the first set of program
 	if (ProgramFirstSet.count(token) == 0){
-			lex->ReportError ("err current character should be : in firsts of program");
+			lex->ReportError ("expected '(LPAREN_T)', symbol, \'' , or number; before program" + lex->GetLexeme());
 			errors++;
 	}
-	// Error message -
-	// 	then keep going or keep getting token until token is
-	// 	in the firsts of program
+
 
 	errors += Stmt ();
-	// lex->debug <<"back in program after a call to stmt()\n";
 	errors += StmtList ();
 
+	// if program does not end with EOF, report error
 	if (token != EOF_T){
-		lex->ReportError ("Expected end of file; " + lex->GetLexeme ());
+		lex->ReportError ("Expected end of file; after program" + lex->GetLexeme ());
 		errors++;
 	}
 
@@ -96,30 +94,24 @@ int SyntacticalAnalyzer::Stmt ()
 	lex->debug << "Stmt function called; current token is " << lex->GetTokenName(token) << endl;
 	int errors = 0;
 
-	// token should be in the firsts of stmt
-	// if true... keep going
-
-	// if false...
+	// check if current token is in first set of statment
 	if (StatementFirstSet.count(token) == 0){
-			lex->ReportError ("err in first set of stmt");
+			lex->ReportError ("expected ( , number, symbol , \' , end-of-file , ) before statment; " + lex->GetLexeme());
 			errors++;
 			token = lex->GetToken();
 	}
-	// if false...
-	// Error message -
-	// 	then keep going or keep getting token until token is
-	// 	in the firsts of stmt
+
+	// if current token is '(' then try ( action ) syntax
+	// otherwise literal syntax rule
 
 	if (token == LPAREN_T){
 		// rule 5
-		token = lex->GetToken();
+		token = lex->GetToken(); // walk to next token and try action syntax
 		errors += Action();
 		if (token == RPAREN_T){
-			// now go to follow set token
-			// lex->debug << "checking if '" << lex->GetLexeme() << "' is " << "')'\n";
 			token = lex->GetToken();		
 		}else{
-			lex->ReportError ("Expected ')'; got " + lex->GetLexeme ());
+			lex->ReportError ("Expected ')' after action; got " + lex->GetLexeme ());
 			errors++;
 		}
 	}
@@ -128,21 +120,12 @@ int SyntacticalAnalyzer::Stmt ()
 		errors += Literal();
 		
 	}
-
-	
-
-	// token should be in the follows of stmt
-	// if true... keep going
-	// if false...
-	// lex->debug << "about to check current token in stmt follow set; current token is " << lex->GetTokenName(token) << endl;
+	// check if current token is in follow set of statement
 	if (StatmentFollowSet.count(token) == 0){
-		lex->ReportError ("err current character is not in follows of statement");
+		lex->ReportError ("expected (, ), end-of-file, number literal, symbol, or ' after statement; " + lex->GetLexeme());
 		errors++;
 		token = lex->GetToken();
 	}
-	// Error message -
-	// 	then keep going or keep getting token until token is
-	// 	in the follows of stmt
 	lex->debug << "statement function returning " << errors << " errors\n";
 
 	return errors;
@@ -157,7 +140,17 @@ int SyntacticalAnalyzer::StmtList ()
 	lex->debug << "Stmt list function called; current token is " << lex->GetTokenName(token) << endl;
 	int errors = 0;
 
-	// check if current token corresponds to stmt, if not return
+	// check if current token is in first set of statment list
+	if (StatementListFirstSet.count(token) == 0){
+			lex->ReportError ("expected ( , number, symbol , \' , end-of-file , ) before statement list; " + lex->GetLexeme());
+			errors++;
+			token = lex->GetToken();
+	}
+
+
+	// check if current token is within the first set of stmt
+	// if yes then apply stmt stmtlist syntax rule
+	// if not, apply lambda rule
 	if (StatementFirstSet.count(token) != 0){
 		errors += Stmt ();
 		if (StatmentFollowSet.count(token)){
@@ -167,18 +160,11 @@ int SyntacticalAnalyzer::StmtList ()
 	else{
 		lex->debug << "in stmt list; current expression is empty\n";
 	}
-	
-	// token should be in the follows of stmt
-	// if true... keep going
-	// if false...
-	// lex->debug << "about to check current token in StmtList follow set; current token is " << lex->GetTokenName(token) << endl;
+	// check if current token is in follow set of statement list
 	if (StatementListFollowSet.count(token) == 0){
-		lex->ReportError ("err in follows of statement list");
+		lex->ReportError ("expected ) or end-of-file after statement list; got" + lex->GetLexeme());
 		errors++;
 	}
-	// Error message -
-	// 	then keep going or keep getting token until token is
-	// 	in the follows of stmt
 	lex->debug << "statement list function returning " << errors << " errors\n";
 
 	return errors;
@@ -192,20 +178,12 @@ int SyntacticalAnalyzer::Quoted_Literal ()
 	lex->debug << "quoted literal function called; current token is " << lex->GetTokenName(token) << endl;
 	int errors = 0;
 
-	// token should be in the firsts of stmt
-	// if true... keep going
-
-	// if false...
+	// check if current token is in first set of quoted literal
 	if (QuotedLiteralFirstSet.count(token) == 0){
-			lex->ReportError ("err in first set of literal");
+			lex->ReportError ("expected number, symbol or '(' before quoted literal; " + lex->GetLexeme());
 			errors++;
 			token = lex->GetToken();
 	}
-	// if false...
-	// Error message -
-	// 	then keep going or keep getting token until token is
-	// 	in the firsts of stmt
-	
 
 	// rule 11
 	if (token == LPAREN_T){
@@ -213,7 +191,7 @@ int SyntacticalAnalyzer::Quoted_Literal ()
 		errors += StmtList();
 		
 		if (token != RPAREN_T){
-			lex->ReportError("Quoted_Literal: expected ')'' after end of statment list");
+			lex->ReportError("Quoted_Literal: expected ')' after end of statment list");
 			errors++;
 		}
 		token = lex->GetToken(); // go to token in follow set
@@ -224,21 +202,15 @@ int SyntacticalAnalyzer::Quoted_Literal ()
 		token = lex->GetToken(); // go to token in follow set
 	}
 	else{
-		lex->ReportError("Quoted_Literal: expected symbol, number literal, or statement list");
+		lex->ReportError("Quoted_Literal: expected symbol, number, or statement list");
 		errors++;
 	}
 
-	// token should be in the follows of stmt
-	// if true... keep going
-	// if false...
-	// lex->debug << "about to check current token in Quoted_Literal follow set; current token is " << lex->GetTokenName(token) << endl;
+	// check if current token is in follow set of quoted literal
 	if (QuotedLiteralFollowSet.count(token) == 0){
-		lex->ReportError ("err in follows of quoted literal");
+		lex->ReportError ("expected ), end-of-file, (, number, symbol, or ' after quoted literal; got" + lex->GetLexeme());
 		errors++;
 	}
-	// Error message -
-	// 	then keep going or keep getting token until token is
-	// 	in the follows of stmt
 	lex->debug << "quoted literal function returning " << errors << " errors\n";
 
 	return errors;
@@ -253,18 +225,13 @@ int SyntacticalAnalyzer::Literal ()
 	lex->debug << "literal function called; current token is " << lex->GetTokenName(token) << endl;
 	int errors = 0;
 
-	// token should be in the firsts of stmt
-	// if true... keep going
-	// if false...
+	// check if current token is in first set of  literal
 	if (LiteralFirstSet.count(token) == 0){
-			lex->ReportError ("err in first set of literal");
+			lex->ReportError ("expected number, symbol or '(' before literal; " + lex->GetLexeme());
 			errors++;
 			token = lex->GetToken();
 	}
-	// if false...
-	// Error message -
-	// 	then keep going or keep getting token until token is
-	// 	in the firsts of stmt	
+
 	if (token == QUOTE_T){
 		// rule 8
 		token = lex->GetToken();
@@ -278,19 +245,11 @@ int SyntacticalAnalyzer::Literal ()
 		lex->ReportError ("err in literal: expected number literal, symbol or quoted literal; got" + lex->GetTokenName(token));
 		errors++;
 	}
-
-	// token should be in the follows of stmt
-	// if true... keep going
-	// if false...
-	// lex->debug << "about to check current token in Literal follow set; current token is " << lex->GetTokenName(token) << endl;
+	// check if current token is in follow set of  literal
 	if (LiteralFollowSet.count(token) == 0){
-		lex->ReportError ("err in follows of literal");
+		lex->ReportError ("expected ), end-of-file, (, number, symbol, or ' after literal; got " + lex->GetLexeme());
 		errors++;
-		token = lex->GetToken();
 	}
-	// Error message -
-	// 	then keep going or keep getting token until token is
-	// 	in the follows of stmt
 	lex->debug << "literal function returning " << errors << " errors\n";
 
 	return errors;
@@ -303,26 +262,19 @@ int SyntacticalAnalyzer::Action(){
 /********************************************************************************/
 	lex->debug << "action function called; current token is " << lex->GetTokenName(token) << endl;
 	int errors = 0;
-
-	// token should be in the firsts of stmt
-	// if true... keep going
-
-	// if false...
+	// check if current token is in first set of  action
 	if (ActionFirstSet.count(token) == 0){
-			lex->ReportError ("err not in first set of action");
+			lex->ReportError ("current token should not precede action; " + lex->GetLexeme());
 			errors++;
 			token = lex->GetToken();
 	}
 
 	// rule 12
 	if (token == DEFINE_T){
-		
-		// define syntax: (define symbol literal)
 		token = lex->GetToken();
 		token_type nextToken = lex->GetToken();
 		 if ( token == LPAREN_T && nextToken == SYMBOL_T){
 		 	token = lex->GetToken();
-			lex->debug << "in the define ( symbol ) stmt() syntax" << endl;
 			errors += Param_List();
 			if (token == RPAREN_T){
 				token = lex->GetToken(); // set up token for statment call
@@ -343,16 +295,11 @@ int SyntacticalAnalyzer::Action(){
 		
 	}
 	// rule 15
-	else if (token == IF_T){
-		// if syntax: if stmt() stmt() else()
-		lex->debug << "before stmt, stmt Else_part num errors: " << errors << endl;
+	else if (token == IF_T){ // if syntax: if stmt() stmt() else()
 		token = lex->GetToken();
 		errors += Stmt();
-		lex->debug << "before second stmt, in if stmt num errors: " << errors << endl;
 		errors += Stmt();
-		lex->debug << "after stmt, stmt but before Else_part num errors: " << errors << endl;
 		errors += Else_part();
-		lex->debug << "after stmt, stmt Else_part num errors: " << errors << endl;
 	}
 
 	else {
@@ -362,10 +309,8 @@ int SyntacticalAnalyzer::Action(){
 			case CAR_T: case CDR_T: case NOT_T: case LISTOP_T: case NUMBERP_T: 
 			case SYMBOLP_T: case LISTP_T: case ZEROP_T: case NULLP_T: 
 			case CHARP_T: case STRINGP_T: 
-				
 				token = lex->GetToken();
 				errors += Stmt();
-				lex->debug << "current token is in action rule stmt " << lex->GetTokenName(token) << endl;
 				break;
 
 			// stmt_list
@@ -373,18 +318,13 @@ int SyntacticalAnalyzer::Action(){
 			case GTE_T: case LT_T: case LTE_T: case SYMBOL_T:
 				token = lex->GetToken();
 				errors += StmtList();
-				lex->debug << "current token is in action rule stmtlist " << lex->GetTokenName(token) << endl;
 				break;
 			
 			// stmt stmt
 			case CONS_T:
-				
 				token = lex->GetToken();
 				errors += Stmt();
-				lex->debug << "after first stmt in CONS there are " << errors << " errors " << endl;
 				errors += Stmt();
-				lex->debug << "after second stmt in CONS there are " << errors << " errors " << endl;
-				lex->debug << "current token is in action rule stmt smt " << lex->GetTokenName(token) << endl;
 				break;
 
 			// stmt stmt_list
@@ -392,7 +332,6 @@ int SyntacticalAnalyzer::Action(){
 				token = lex->GetToken();
 				errors += Stmt();
 				errors += StmtList();
-				lex->debug << "current token is in action rule stmt stmtlist " << lex->GetTokenName(token) << endl;
 				break;
 
 			default:
@@ -404,20 +343,10 @@ int SyntacticalAnalyzer::Action(){
 			}
 	}
 
-	// token should be in the follows of stmt
-	// if true... keep going
-
-	// if false...
-	lex->debug << "about to check current token in action follow set; current token is " << lex->GetTokenName(token) << endl;
 	if (ActionFollowSet.count(token) == 0){
-		lex->ReportError ("err in follows of action");
+		lex->ReportError ("current token is not expected after action; " + lex->GetLexeme());
 		errors++;
-	}else{
-		lex->debug << lex->GetTokenName(token) << " is in action follow set" << endl;
 	}
-	// Error message -
-	// 	then keep going or keep getting token until token is
-	// 	in the follows of stmt
 	lex->debug << "action function returning " << errors << " errors\n";
 
 	return errors;
@@ -436,7 +365,6 @@ int SyntacticalAnalyzer::Param_List(){
 		return 0;	
 	} 
 
-
 	// otherwise check similar to other rules
 	if ( ParamListFirstSet.count(token) == 0 ){
 			lex->ReportError ("err not in first set of param list");
@@ -445,26 +373,15 @@ int SyntacticalAnalyzer::Param_List(){
 	}
 	token = lex->GetToken();
 
-
-	
-
 	// check if 13 applies 
 	if (token == SYMBOL_T){
 		errors += Param_List();
 	}
 	//otherwise use rule 14: lambda rule
-
-	// token should be in the follows of stmt
-	// if true... keep going
-	// if false...
-	// lex->debug << "about to check current token in Param_List follow set; current token is " << lex->GetTokenName(token) << endl;
 	if (ParamListFollowSet.count(token) == 0 ){
-		lex->ReportError ("err in follows of param list");
+		lex->ReportError ("current token should not be after parameter list; " + lex->GetLexeme());
 		errors++;
 	}
-	// Error message -
-	// 	then keep going or keep getting token until token is
-	// 	in the follows of stmt
 	lex->debug << "param list function returning " << errors << " errors\n";
 	return errors;
 }
@@ -476,28 +393,24 @@ int SyntacticalAnalyzer::Else_part(){
 
 	int errors = 0;
 	lex->debug << "Else_part function called; current token is " << lex->GetTokenName(token) << endl;
-// check if current token corresponds to stmt, if not return
-	if (StatementFirstSet.count(token) != 0){
-		errors += Stmt ();
-		if (StatmentFollowSet.count(token)){
-		}
-	}
-	else{
-		lex->debug << "in Else_part; current expression is empty\n";
-	}
 
-
-	// token should be in the follows of stmt
-	// if true... keep going
-	// if false...
-	// lex->debug << "about to check current token in Else_part follow set; current token is " << lex->GetTokenName(token) << endl;
-	if ( ElsePartFollowSet.count(token) == 0 ){
-		lex->ReportError ("err in follows of else part ");
+	if ( ElsePartFirstSet.count(token) == 0 ){
+		lex->ReportError ("current token is not expected before else part; " + lex->GetLexeme());
 		errors++;
 	}
-	// Error message -
-	// 	then keep going or keep getting token until token is
-	// 	in the follows of stmt
+
+	// apply else part --> stmt() rule only if current token is in first set of stmt
+	// otherwise apply lambda rule
+
+	if (StatementFirstSet.count(token) != 0){
+		errors += Stmt ();
+		
+	}
+
+	if ( ElsePartFollowSet.count(token) == 0 ){
+		lex->ReportError ("current token is not expected after else part; " + lex->GetLexeme());
+		errors++;
+	}
 	lex->debug << " else part function returning " << errors << " errors\n";
 	return errors;
 }

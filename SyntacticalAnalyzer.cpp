@@ -27,6 +27,7 @@ SyntacticalAnalyzer::SyntacticalAnalyzer (char * filename)
 	inFunction = false;
 	parenCount = 0;
 	stmtListFlag = 3;
+	ifConditionFlag = false;
 	quotedLitFlag = false;
 
 	operation = "";
@@ -119,19 +120,23 @@ int SyntacticalAnalyzer::Stmt ()
 
 	// if current token is '(' then try ( action ) syntax
 	// otherwise literal syntax rule
+	
 
-	if (inFunction && !parenCount) generator->writeCout();
+	if (!inFunction && !parenCount && token != LPAREN_T){
+		lex->debug << "generating c++ cout \n";	
+		generator->writeCout();
+	}
+
+	if (inFunction && !parenCount && !ifConditionFlag) generator->writeReturn();
 
 	if (token == LPAREN_T){
 
-		generator->writeOpenParen();
-		parenCount++;
 		// rule 5
 		token = lex->GetToken(); // walk to next token and try action syntax
 		
 		errors += Action();
-		generator->writeCloseParen();
-		parenCount--;
+
+		
 		if (token == RPAREN_T){
 			token = lex->GetToken();		
 		}else{
@@ -143,10 +148,10 @@ int SyntacticalAnalyzer::Stmt ()
 		// rule 4
 		
 		errors += Literal();
+		if (!parenCount) generator->writeEndl();
 	}
 
 
-	if (!parenCount) generator->writeSemicolon();
 	
 	// check if current token is in follow set of statement
 	if (StatmentFollowSet.count(token) == 0){
@@ -352,7 +357,7 @@ int SyntacticalAnalyzer::Action(){
 			if (token == RPAREN_T){
 				token = lex->GetToken(); // set up token for statment call
 				errors += Stmt();
-				generator->writeSemicolon();
+				// generator->writeSemicolon();
 				generator->closeFnImpl();
 				inFunction = false;	
 				generator->setFunctionFlag(inFunction);
@@ -379,7 +384,9 @@ int SyntacticalAnalyzer::Action(){
 		
 		parenCount += 1;
 		generator->startIf();
+		ifConditionFlag = true;
 		errors += Stmt();
+		ifConditionFlag = false;
 		generator->closeIf();
 		// dont adjust paren count, since it is incremented before the if block
 		errors += Stmt();
@@ -389,13 +396,13 @@ int SyntacticalAnalyzer::Action(){
 	}
 
 	else {
-		// if within function and top of stmt depth, then need to write stmt, this stmt's result should be returned
-		if (inFunction && !parenCount){
-			
-		}
-		// 
-		// parenCount += 1;
-		
+		if (!inFunction && !parenCount && token != LPAREN_T){
+		lex->debug << "generating c++ cout \n";	
+		generator->writeCout();
+	}
+		generator->writeOpenParen();
+		parenCount++;
+
 		string actionName;
 		switch (token){
 			lex->debug << "generating action";
@@ -438,7 +445,7 @@ int SyntacticalAnalyzer::Action(){
 					stmtListFlag = 3;
 				}
 				else{
-					
+					int oldFlag = stmtListFlag;
 					 parenCount += 1;
 					 generator->outputLexemeName(lex->GetLexeme());
 					 generator->writeOpenParen();
@@ -446,9 +453,10 @@ int SyntacticalAnalyzer::Action(){
 					token = lex->GetToken();
 					stmtListFlag = 0;
 					errors += StmtList();	
-					stmtListFlag = 3;
+					// stmtListFlag = 3;
 					generator->writeCloseParen();
 					parenCount -=1;
+					stmtListFlag = oldFlag;
 
 				}
 				
@@ -490,6 +498,11 @@ int SyntacticalAnalyzer::Action(){
 				break;
 
 			}
+	
+		generator->writeCloseParen();
+		parenCount--;
+		if (!parenCount && !inFunction) generator->writeEndl();
+		else if(inFunction && !parenCount) generator->writeSemicolon();
 	}
 
 	if (ActionFollowSet.count(token) == 0){
@@ -557,9 +570,9 @@ int SyntacticalAnalyzer::Else_part(){
 	// otherwise apply lambda rule
 
 	if (StatementFirstSet.count(token) != 0){
-		
+		// generator->beginElse();
 		errors += Stmt ();
-		
+		// generator->closeElse();
 		
 	}
 

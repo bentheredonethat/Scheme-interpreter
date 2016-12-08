@@ -43,13 +43,13 @@ public:
 		outputFile << "// File: test1.cpp\n";
 		outputFile << "#include <iostream>\n#include “Object.h”\nUsing namespace std;\n\n";
 		fnBuffer = "";
-		mainBuffer = "int main(){\n";
+		mainBuffer = "int main(){\n\t";
 	}
 
 	~CodeGen(){
 		outputFile << fnBuffer;
 		outputFile << mainBuffer;
-		outputFile << "\nreturn 0;\n}\n";
+		outputFile << "\n\treturn 0;\n}\n";
 		outputFile.flush();
 		outputFile.close();
 	}
@@ -105,7 +105,7 @@ public:
 	}
 
 	void closeParamList(){
-		(functionFlag ? fnBuffer : mainBuffer) +=  "){\n return ";
+		(functionFlag ? fnBuffer : mainBuffer) +=  "){\n ";
 		
 	}
 
@@ -128,7 +128,7 @@ public:
 	}
 
 	void writeSemicolon(){
-		(functionFlag ? fnBuffer : mainBuffer) += ";\n\t";
+		(functionFlag ? fnBuffer : mainBuffer) += ";";
 		
 		
 	}
@@ -146,9 +146,13 @@ public:
 		
 	}
 
+	void writeEndl(){
+		(functionFlag ? fnBuffer : mainBuffer) +=  " << endl;\n\t";	
+	}
+
 	void closefnheader(){
 		
-		(functionFlag ? fnBuffer : mainBuffer) += "){\nreturn ";
+		(functionFlag ? fnBuffer : mainBuffer) += "){\n\t";
 		
 	}
 
@@ -158,6 +162,9 @@ public:
 		
 	}
 
+	void writeReturn(){
+		(functionFlag ? fnBuffer : mainBuffer) +=  "return ";
+	}
 
 	void setFunctionFlag(bool state){
 		functionFlag = state;

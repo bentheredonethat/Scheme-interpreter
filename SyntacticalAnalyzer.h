@@ -36,6 +36,7 @@ class SyntacticalAnalyzer
 
 	bool inFunction;
 	bool quotedLitFlag;
+	bool ifConditionFlag;
 	int parenCount;
 	int stmtListFlag;
 	string operation; // hold current op 

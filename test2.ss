@@ -1,5 +1,5 @@
-(define (pi a b c)  (if (> n 0) (= n 10) (= n 1)))
-(define (pi)  (if (> n 0) (= n 10) (= n 1)))
+(define (pi a b c)  (if (> a 0) (= b 10) (= c 1)))
+(define (pi)  (if (> 5 0) (= 5 10) (< 3 1)))
 (car '(abc def ghi))
 (cdr '(abc def ghi))
 (cons 'abd '(1 2 3))

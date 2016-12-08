@@ -35,6 +35,7 @@ class SyntacticalAnalyzer
 	CodeGen * generator;
 
 	bool inFunction;
+	bool quotedLitFlag;
 	int parenCount;
 	int stmtListFlag;
 	string operation; // hold current op 

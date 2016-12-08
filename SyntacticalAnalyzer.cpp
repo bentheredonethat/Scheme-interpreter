@@ -27,6 +27,7 @@ SyntacticalAnalyzer::SyntacticalAnalyzer (char * filename)
 	inFunction = false;
 	parenCount = 0;
 	stmtListFlag = 3;
+	quotedLitFlag = false;
 
 	operation = "";
 
@@ -146,9 +147,6 @@ int SyntacticalAnalyzer::Stmt ()
 
 
 	if (!parenCount) generator->writeSemicolon();
-
-	generator->separator(stmtListFlag, operation); // later on use stmtlistflag to determine type of separator
-
 	
 	// check if current token is in follow set of statement
 	if (StatmentFollowSet.count(token) == 0){
@@ -184,12 +182,17 @@ int SyntacticalAnalyzer::StmtList ()
 	// if not, apply lambda rule
 	if (StatementFirstSet.count(token) != 0){
 		// 
+		
 		errors += Stmt ();
+		if (StatementFirstSet.count(token)){
+			// only put separator if there is something after current stmt
+			generator->separator(stmtListFlag, operation);	
+		}
 		
 
 		if (StatmentFollowSet.count(token)){
-			// 
 			errors += StmtList ();
+
 		}
 	}
 	else{
@@ -275,7 +278,9 @@ int SyntacticalAnalyzer::Literal ()
 		stmtListFlag = 1;
 		parenCount +=1;
 		token = lex->GetToken();
+		quotedLitFlag = true;
 		errors += Quoted_Literal();	
+		quotedLitFlag = false;
 		//if(stmtListFlag == 0){
 		generator->quote();
 		stmtListFlag = 3;
@@ -285,10 +290,10 @@ int SyntacticalAnalyzer::Literal ()
 	}
 	else if (token == NUMLIT_T)
 	{ // Rule 6 and 7
-		generator->beginLit();
+		if (!quotedLitFlag) generator->beginLit();
 		generator->outputLexemeName(lex->GetLexeme());
 		token = lex->GetToken();
-		generator->writeCloseParen();
+		if (!quotedLitFlag) generator->writeCloseParen();
 	}
 
 	else if (token == SYMBOL_T)
@@ -508,7 +513,7 @@ int SyntacticalAnalyzer::Param_List(){
 
 	// check if 13 applies 
 	if (token == SYMBOL_T){
-		generator->separator();
+		generator->separator(0);
 		
 		errors += Param_List();
 	}

@@ -1,4 +1,4 @@
-P2.out : Project2.o SetLimits.o LexicalAnalyzer.o SyntacticalAnalyzer.o
+P2.out : Project2.o SetLimits.o LexicalAnalyzer.o SyntacticalAnalyzer.o CodeGen.o
 	g++ -g -o P2.out Project2.o SetLimits.o LexicalAnalyzer.o SyntacticalAnalyzer.o
 
 Project2.o : Project2.cpp SetLimits.h SyntacticalAnalyzer.h
@@ -6,6 +6,9 @@ Project2.o : Project2.cpp SetLimits.h SyntacticalAnalyzer.h
 
 SetLimits.o : SetLimits.cpp SetLimits.h
 	g++ -g -c SetLimits.cpp
+
+CodeGen.o : CodeGen.cpp
+	g++ -g -c CodeGen.cpp -std=c++11
 
 LexicalAnalyzer.o : LexicalAnalyzer.cpp LexicalAnalyzer.h
 	g++ -g -c LexicalAnalyzer.cpp

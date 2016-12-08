@@ -11,6 +11,7 @@
 #include <fstream>
 #include <set>
 #include "LexicalAnalyzer.h"
+#include "CodeGen.cpp"
 
 using namespace std;
 
@@ -31,6 +32,13 @@ class SyntacticalAnalyzer
 	int Param_List();
 	int Else_part();
 
+	CodeGen * generator;
+
+	bool inFunction;
+	int parenCount;
+	int stmtListFlag;
+	string operation; // hold current op 
+	
 	set<token_type> ProgramFirstSet;
 	set<token_type> LiteralFirstSet;
 	set<token_type> QuotedLiteralFirstSet ;

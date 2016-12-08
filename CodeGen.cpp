@@ -163,6 +163,15 @@ public:
 		functionFlag = state;
 	}
 
+	void startIf(){
+		(functionFlag ? fnBuffer : mainBuffer) +=  "if";
+	}
+	void closeIf(){
+		(functionFlag ? fnBuffer : mainBuffer) +=  "){\n ";
+	}
+
+
+
 private:
 	int parenCount; // record depth of parens
 	int functionFlag;

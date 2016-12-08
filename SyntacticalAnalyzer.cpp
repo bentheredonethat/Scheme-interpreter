@@ -123,14 +123,13 @@ int SyntacticalAnalyzer::Stmt ()
 
 	if (token == LPAREN_T){
 
-		// generator->writeOpenParen();
+		generator->writeOpenParen();
 		parenCount++;
-		// cout << parenCount << endl;
 		// rule 5
 		token = lex->GetToken(); // walk to next token and try action syntax
 		
 		errors += Action();
-		// generator->writeCloseParen();
+		generator->writeCloseParen();
 		parenCount--;
 		if (token == RPAREN_T){
 			token = lex->GetToken();		
@@ -286,7 +285,6 @@ int SyntacticalAnalyzer::Literal ()
 	}
 	else if (token == NUMLIT_T)
 	{ // Rule 6 and 7
-		if (inFunction) cout << "in function" << endl;
 		generator->beginLit();
 		generator->outputLexemeName(lex->GetLexeme());
 		token = lex->GetToken();
@@ -370,13 +368,14 @@ int SyntacticalAnalyzer::Action(){
 	else if (token == IF_T){ // if syntax: if stmt() stmt() else()
 		token = lex->GetToken();
 		
-		lex->debug << " generating if ";
-		// parenCount += 1;
+		parenCount += 1;
+		generator->startIf();
 		errors += Stmt();
-		
-		// parenCount -= 1;
+		generator->closeIf();
+		// dont adjust paren count, since it is incremented before the if block
 		errors += Stmt();
-		
+		generator->writeCloseParen();
+		parenCount -= 1;
 		errors += Else_part();
 	}
 

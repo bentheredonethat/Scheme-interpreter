@@ -93,7 +93,7 @@ public:
 				separation = " ";
 				break;
 			case 2:
-				separation = operation;
+				separation = " " + operation + " ";
 				break;
 			case 3:
 				separation = "";
@@ -128,7 +128,7 @@ public:
 	}
 
 	void writeSemicolon(){
-		(functionFlag ? fnBuffer : mainBuffer) += ";\n";
+		(functionFlag ? fnBuffer : mainBuffer) += ";\n\t";
 		
 		
 	}
@@ -154,7 +154,7 @@ public:
 
 	void beginLit(){
 		
-		(functionFlag ? fnBuffer : mainBuffer) +=  "Object (";
+		(functionFlag ? fnBuffer : mainBuffer) +=  "Object(";
 		
 	}
 

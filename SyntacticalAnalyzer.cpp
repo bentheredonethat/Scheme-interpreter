@@ -226,6 +226,7 @@ int SyntacticalAnalyzer::Quoted_Literal ()
 
 	// rule 11
 	if (token == LPAREN_T){
+
 		token = lex->GetToken();
 		errors += StmtList();
 		
@@ -238,6 +239,8 @@ int SyntacticalAnalyzer::Quoted_Literal ()
 
 	// rule 9 and 10
 	else if(token == SYMBOL_T || token == NUMLIT_T){
+		lex->debug << "outputing lit to quoted lit  "  ;
+		generator->outputLexemeName(lex->GetLexeme());
 		token = lex->GetToken(); // go to token in follow set
 	}
 	else{
@@ -277,6 +280,7 @@ int SyntacticalAnalyzer::Literal ()
 		generator->quote();
 		stmtListFlag = 1;
 		parenCount +=1;
+		lex->debug << "in quoted lit";
 		token = lex->GetToken();
 		quotedLitFlag = true;
 		errors += Quoted_Literal();	
@@ -415,13 +419,23 @@ int SyntacticalAnalyzer::Action(){
 				if (token != SYMBOL_T){
 					
 					operation = lex->GetLexeme();
+					if (token == AND_T) operation = "&&";
+					if (token == OR_T) operation = "||";
+					
 					token = lex->GetToken();
+
+
+					// number literals have to be wrapped in object lit
+					if (token == NUMLIT_T) generator->beginLit();
 					generator->outputLexemeName(lex->GetLexeme());
+					if (token == NUMLIT_T) generator->writeCloseParen();
+
 					stmtListFlag = 2;
 					generator->separator(stmtListFlag, operation);
-					stmtListFlag = 3;
+					
 					token = lex->GetToken();
 					errors += StmtList();	
+					stmtListFlag = 3;
 				}
 				else{
 					
@@ -450,10 +464,10 @@ int SyntacticalAnalyzer::Action(){
 				token = lex->GetToken();
 				errors += Stmt();
 				stmtListFlag = 0;
-				generator->separator(0);
+				generator->separator(stmtListFlag);
 				errors += Stmt();
 				generator->writeCloseParen();
-					parenCount -=1;
+				parenCount -=1;
 				break;
 
 			// stmt stmt_list

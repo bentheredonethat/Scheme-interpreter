@@ -29,6 +29,7 @@ SyntacticalAnalyzer::SyntacticalAnalyzer (char * filename)
 	stmtListFlag = 3;
 	ifConditionFlag = false;
 	quotedLitFlag = false;
+	ifStmtFlag = false;
 
 	operation = "";
 
@@ -127,7 +128,6 @@ int SyntacticalAnalyzer::Stmt ()
 		generator->writeCout();
 	}
 
-	if (inFunction && !parenCount && !ifConditionFlag) generator->writeReturn();
 
 	if (token == LPAREN_T){
 
@@ -148,11 +148,10 @@ int SyntacticalAnalyzer::Stmt ()
 		// rule 4
 		
 		errors += Literal();
-		if (!parenCount) generator->writeEndl();
+		if (!parenCount && !inFunction) generator->writeEndl();
 	}
 
 
-	
 	// check if current token is in follow set of statement
 	if (StatmentFollowSet.count(token) == 0){
 		lex->ReportError ("expected (, ), end-of-file, number literal, symbol, or ' after statement; " + lex->GetLexeme());
@@ -279,6 +278,11 @@ int SyntacticalAnalyzer::Literal ()
 			token = lex->GetToken();
 	}
 
+
+		if (inFunction && !parenCount && !ifConditionFlag){
+			generator->writeReturn();	
+		} 
+
 	if (token == QUOTE_T){
 		// rule 8
 		generator->beginLit();
@@ -290,12 +294,10 @@ int SyntacticalAnalyzer::Literal ()
 		quotedLitFlag = true;
 		errors += Quoted_Literal();	
 		quotedLitFlag = false;
-		//if(stmtListFlag == 0){
 		generator->quote();
 		stmtListFlag = 3;
 		parenCount -=1;
 		generator->writeCloseParen();
-		//}
 	}
 	else if (token == NUMLIT_T)
 	{ // Rule 6 and 7
@@ -311,10 +313,15 @@ int SyntacticalAnalyzer::Literal ()
 		token = lex->GetToken();
 	}
 
+
+
 	else{
 		lex->ReportError ("err in literal: expected number literal, symbol or quoted literal; got" + lex->GetTokenName(token));
 		errors++;
 	}
+	if (inFunction && !parenCount && !ifConditionFlag){
+		generator->writeSemicolon();	
+	} 
 	// check if current token is in follow set of  literal
 	if (LiteralFollowSet.count(token) == 0){
 		lex->ReportError ("expected ), end-of-file, (, number, symbol, or ' after literal; got " + lex->GetLexeme());
@@ -356,8 +363,8 @@ int SyntacticalAnalyzer::Action(){
 			generator->closefnheader();
 			if (token == RPAREN_T){
 				token = lex->GetToken(); // set up token for statment call
+
 				errors += Stmt();
-				// generator->writeSemicolon();
 				generator->closeFnImpl();
 				inFunction = false;	
 				generator->setFunctionFlag(inFunction);
@@ -380,6 +387,7 @@ int SyntacticalAnalyzer::Action(){
 	}
 	// rule 15
 	else if (token == IF_T){ // if syntax: if stmt() stmt() else()
+		ifStmtFlag = true;
 		token = lex->GetToken();
 		
 		parenCount += 1;
@@ -388,30 +396,42 @@ int SyntacticalAnalyzer::Action(){
 		errors += Stmt();
 		ifConditionFlag = false;
 		generator->closeIf();
-		// dont adjust paren count, since it is incremented before the if block
+		parenCount -= 1;
 		errors += Stmt();
-		generator->writeCloseParen();
+		parenCount += 1;
+		generator->closeElse();
 		parenCount -= 1;
 		errors += Else_part();
+
 	}
 
 	else {
 		if (!inFunction && !parenCount && token != LPAREN_T){
-		lex->debug << "generating c++ cout \n";	
-		generator->writeCout();
-	}
+			lex->debug << "generating c++ cout \n";	
+			generator->writeCout();
+		}
+		if (inFunction && !parenCount && !ifConditionFlag){
+			generator->writeReturn();	
+		} 
 		generator->writeOpenParen();
 		parenCount++;
 
 		string actionName;
+		string str;
 		switch (token){
 			lex->debug << "generating action";
 			// stmt
 			case CAR_T: case CDR_T: case NOT_T: case LISTOP_T: case NUMBERP_T: 
 			case SYMBOLP_T: case LISTP_T: case ZEROP_T: case NULLP_T: 
 			case CHARP_T: case STRINGP_T: 
-			// 
-				generator->outputLexemeName(lex->GetLexeme());
+				str = (token == NOT_T) ? "!" : lex->GetLexeme();
+				// if predicate, replace ? with p so that Object class can use built in function
+				if (str[str.size()-1] == '?'){
+					str.erase (str.size()-1);
+					str += 'p';
+
+				}
+				generator->outputLexemeName(str);
 				generator->writeOpenParen();
 				parenCount+=1;
 				token = lex->GetToken();
@@ -430,19 +450,26 @@ int SyntacticalAnalyzer::Action(){
 					if (token == OR_T) operation = "||";
 					
 					token = lex->GetToken();
+					// if empty then done
+					if (token == RPAREN_T){
+						generator->outputLexemeName(operation);
+						// do nothing
+					}
+					else {
+						// number literals have to be wrapped in object lit
+						if (token == NUMLIT_T) generator->beginLit();
+						generator->outputLexemeName(lex->GetLexeme());
+						if (token == NUMLIT_T) generator->writeCloseParen();
 
-
-					// number literals have to be wrapped in object lit
-					if (token == NUMLIT_T) generator->beginLit();
-					generator->outputLexemeName(lex->GetLexeme());
-					if (token == NUMLIT_T) generator->writeCloseParen();
-
-					stmtListFlag = 2;
-					generator->separator(stmtListFlag, operation);
-					
-					token = lex->GetToken();
-					errors += StmtList();	
+						stmtListFlag = 2;
+						generator->separator(stmtListFlag, operation);
+						
+						token = lex->GetToken();
+						errors += StmtList();	
+							
+					}
 					stmtListFlag = 3;
+					
 				}
 				else{
 					int oldFlag = stmtListFlag;
@@ -453,7 +480,6 @@ int SyntacticalAnalyzer::Action(){
 					token = lex->GetToken();
 					stmtListFlag = 0;
 					errors += StmtList();	
-					// stmtListFlag = 3;
 					generator->writeCloseParen();
 					parenCount -=1;
 					stmtListFlag = oldFlag;
@@ -506,7 +532,11 @@ int SyntacticalAnalyzer::Action(){
 		generator->writeCloseParen();
 		parenCount--;
 		if (!parenCount && !inFunction) generator->writeEndl();
-		else if(inFunction && !parenCount) generator->writeSemicolon();
+
+		else if (inFunction && !parenCount && !ifConditionFlag){
+			generator->writeSemicolon();	
+		}
+		
 	}
 
 	if (ActionFollowSet.count(token) == 0){
@@ -572,11 +602,10 @@ int SyntacticalAnalyzer::Else_part(){
 
 	// apply else part --> stmt() rule only if current token is in first set of stmt
 	// otherwise apply lambda rule
-
 	if (StatementFirstSet.count(token) != 0){
-		// generator->beginElse();
+		generator->beginElse();
 		errors += Stmt ();
-		// generator->closeElse();
+		generator->closeElse();
 		
 	}
 

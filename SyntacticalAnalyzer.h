@@ -40,6 +40,7 @@ class SyntacticalAnalyzer
 	int parenCount;
 	int stmtListFlag;
 	string operation; // hold current op 
+	bool ifStmtFlag;
 	
 	set<token_type> ProgramFirstSet;
 	set<token_type> LiteralFirstSet;

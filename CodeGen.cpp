@@ -23,12 +23,14 @@ public:
 
 		// prep output file name
 		 // remove 'ss' from string
-		filename.pop_back();
-		filename.pop_back();
+		// filename.pop_back();
+		filename.erase (filename.size()-1);
+		filename.erase (filename.size()-1);
+		// filename.pop_back();
 		filename += "cpp"; // then append ss for outputfile
 
 
-		outputFile.open(filename);
+		outputFile.open(filename.c_str());
 
 		// error checking on input and output files
 		if (!outputFile.good()){

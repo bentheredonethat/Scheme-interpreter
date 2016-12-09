@@ -103,3 +103,7 @@ a
 (a)
 (a 1)
 (a 1 2)
+
+
+; handle if inside of main
+(if (> a 2) (= a 10) (= b 5) )

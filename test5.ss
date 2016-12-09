@@ -1,0 +1,7 @@
+(car '(a b c))
+(cdr '(a b c))
+(cons 'd '(a b c))
+(cadr '(a b c d))
+(cddr '(a b c d))
+(caddr '(a b c d))
+(cdddr '(a b c d))

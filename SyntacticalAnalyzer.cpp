@@ -480,15 +480,19 @@ int SyntacticalAnalyzer::Action(){
 
 			// stmt stmt_list
 			case MINUS_T: case DIV_T:
-				
-				stmtListFlag = 2; // use operator
-				actionName = lex->GetLexeme();
+				operation = lex->GetLexeme();
 				token = lex->GetToken();
+				// number literals have to be wrapped in object lit
+				if (token == NUMLIT_T) generator->beginLit();
 				generator->outputLexemeName(lex->GetLexeme());
-				generator->outputLexemeName(actionName);
-				errors += Stmt();
-				errors += StmtList();
-				generator->writeCloseParen();
+				if (token == NUMLIT_T) generator->writeCloseParen();
+
+				stmtListFlag = 2; // use operator
+				generator->separator(stmtListFlag, operation);
+				
+				token = lex->GetToken();
+				errors += StmtList();	
+				stmtListFlag = 3;
 				break;
 
 			default:

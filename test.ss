@@ -12,19 +12,16 @@ a
 '(a 1 2 a)
 ; 12. <action> -> DEFINE_T LPAREN_T SYMBOL_T <param_list> RPAREN_T <stmt>
 ; 13. <param_list> -> SYMBOL_T <param_list> -- tested
-(define (a) a)
 
 ; 14. <param_list> -> <>  -- tested
 ; 15. <action> -> IF_T <stmt> <stmt> <else_part>
 ; 16. <else_part> -> <stmt> -- tested
 ; 17. <else_part> -> <> -- tested
-(define (a )
-	(if (a)
-	 1 
-	 2)
-)
 
-(define (b)(if (b) 1))
+
+
+(define (b)(if (1 > 2) 1))
+(define (aa c) c)
 
 ; 18. <action> -> CAR_T <stmt> -- tested
 (car 'a)

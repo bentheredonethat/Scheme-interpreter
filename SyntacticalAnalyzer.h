@@ -34,13 +34,13 @@ class SyntacticalAnalyzer
 
 	CodeGen * generator;
 
-	bool inFunction;
-	bool quotedLitFlag;
-	bool ifConditionFlag;
-	int parenCount;
-	int stmtListFlag;
+	bool inFunction; // determine if current sentence is within function
+	bool quotedLitFlag; // is current literal a quoted literal
+	bool ifConditionFlag; // is current statement the condition in an if?
+	int parenCount; // +1 for every open paren, -1 for each close paren, 0 if at top level statement. keep track of paren depth
+	int stmtListFlag; // if sequence of stmt's
 	string operation; // hold current op 
-	bool ifStmtFlag;
+	bool ifStmtFlag; // is current statenment an if statement?
 	
 	set<token_type> ProgramFirstSet;
 	set<token_type> LiteralFirstSet;

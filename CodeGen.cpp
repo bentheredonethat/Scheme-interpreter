@@ -6,6 +6,7 @@ using namespace std;
 class CodeGen{
 
 public:
+	// constructor for CodeGen class
 	CodeGen(string filename){ // assume .ss file from syntax analyzer
 
 		// check validity of input
@@ -49,6 +50,8 @@ public:
 		mainBuffer = "int main(){\n\t";
 	}
 
+	// destructor for CodeGen class
+	// send buffers to file then close file
 	~CodeGen(){
 		outputFile << fnBuffer;
 		outputFile << mainBuffer;
@@ -57,35 +60,46 @@ public:
 		outputFile.close();
 	}
 
+	// send lexeme corresponding to current token for arguments in a function call to buffer
 	void outputFnArg(string lexeme){
 		(functionFlag ? fnBuffer : mainBuffer) += lexeme;
 	}
 
+	// send lexeme corresponding to current token for function name to buffer
 	void fnheader(string lexeme){
 		(functionFlag ? fnBuffer : mainBuffer) += "Object " + lexeme + "( " ;
 		
 	}
 
+	// send quote char to buffer
 	void quote(){
 		(functionFlag ? fnBuffer : mainBuffer) += "\"" ;
 		
 	}
 
+	// close else statement 
 	void closeElse(){
 		(functionFlag ? fnBuffer : mainBuffer) += "\n\t}\n ";	
 		
 	}
 
+	// send cout statement to corresponding buffer
 	void writeCout(){
 		(functionFlag ? fnBuffer : mainBuffer) += "cout << ";
 		
 	}
 
+	// begin else statement 
 	void beginElse(){
 		(functionFlag ? fnBuffer : mainBuffer) += "\n\telse{\n\t\t";	
 		
 	}
 
+	// different statements have different separators when being translated from scheme to C++
+	// in function header and or call, separate arguments with ,
+	// operators reqire separating arguments with corresponding argument 
+	// and finally an empty separator so that when a statement list or paramlist is called,
+	// the last element does not have a space
 	void separator(int type = 0, string operation = ""){
 		string separation;
 		switch(type){
@@ -107,75 +121,88 @@ public:
 		(functionFlag ? fnBuffer : mainBuffer) += separation;	
 	}
 
+	// close param list in a function header
 	void closeParamList(){
 		(functionFlag ? fnBuffer : mainBuffer) +=  "){\n ";
 		
 	}
 
+	// output parameter in function header
 	void outputFnParam(string lexeme){
 		(functionFlag ? fnBuffer : mainBuffer) += "Object " +lexeme; 
 		
 	}
 
-
+	// output function names or symbols or number literals
 	void outputLexemeName(string lexeme){
 		(functionFlag ? fnBuffer : mainBuffer) += lexeme;
 		
 	}
 
 
-
+	// close statement
 	void writeCloseParen(){
 		(functionFlag ? fnBuffer : mainBuffer) += ')';
 		
 	}
 
+	// end after statement
 	void writeSemicolon(){
 		(functionFlag ? fnBuffer : mainBuffer) += ";";
 		
 		
 	}
 
-
+	// open statement
 	void writeOpenParen(){
 		(functionFlag ? fnBuffer : mainBuffer) += '(';
 		
 		
 	}
 
+	// close function
 	void closeFnImpl(){
 		(functionFlag ? fnBuffer : mainBuffer) +=  "\n}\n\n";
 		
 		
 	}
 
+	// output endl
 	void writeEndl(){
 		(functionFlag ? fnBuffer : mainBuffer) +=  " << endl;\n\t";	
 	}
 
+	// close function after param list
 	void closefnheader(){
 		
 		(functionFlag ? fnBuffer : mainBuffer) += "){\n\t";
 		
 	}
 
+	// begin wrapping literal
 	void beginLit(){
 		
 		(functionFlag ? fnBuffer : mainBuffer) +=  "Object(";
 		
 	}
 
+
+	// used to return statements in function
 	void writeReturn(){
 		(functionFlag ? fnBuffer : mainBuffer) +=  "return ";
 	}
 
+	// function flag determines which buffer to write to
 	void setFunctionFlag(bool state){
 		functionFlag = state;
 	}
 
+	// begin if stmt
 	void startIf(){
 		(functionFlag ? fnBuffer : mainBuffer) +=  "if";
 	}
+
+	// end if stmt
 	void closeIf(){
 		(functionFlag ? fnBuffer : mainBuffer) +=  "{\n\t\t";
 	}
@@ -184,8 +211,8 @@ public:
 
 private:
 	int parenCount; // record depth of parens
-	int functionFlag;
-	string fnBuffer;
-	string mainBuffer;
-	ofstream outputFile; 
+	int functionFlag; // determine if current output is within function
+	string fnBuffer; // buffer to hold function impl's
+	string mainBuffer; // hold statements in main
+	ofstream outputFile;  // file which will hold content of buffers
 };

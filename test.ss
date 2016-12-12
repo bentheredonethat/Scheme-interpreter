@@ -1,7 +1,7 @@
 ; 6. <literal> -> NUMLIT_T
 5
 ; 7. <literal> -> SYMBOL_T
-a
+
 ; 8. <literal> -> QUOTE_T <quoted_lit>
 ; 9. <quoted_lit> -> SYMBOL_T
 ; 10. <quoted_lit> -> NUMLIT_T
@@ -20,22 +20,22 @@ a
 
 
 
-(define (b)(if (1 > 2) 1))
+(define (b)(if (> 1 2) 1 2))
 (define (aa c) c)
+(define (ab ) 1)
+(define (ac ) '1)
 
 ; 18. <action> -> CAR_T <stmt> -- tested
 (car 'a)
 ; 19. <action> -> CDR_T <stmt> -- tested
 (cdr 'a)
 ; 20. <action> -> CONS_T <stmt> <stmt> 
-(cons (a) 'a)
+(cons 1 'a)
 ; 21. <action> -> AND_T <stmt_list>
-(and)
-(and 1)
+
 (and 1 2)
 ; 22. <action> -> OR_T <stmt_list>
-(or)
-(or 1)
+
 (or 1 2)
 ; 23. <action> -> NOT_T <stmt>
 (not 1)
@@ -63,44 +63,34 @@ a
 (string? 1)
 (string? (string? 1))
 ; 32. <action> -> PLUS_T <stmt_list>
-(+)
-(+ 1)
 (+ 1 2)
 ; 33. <action> -> MINUS_T <stmt> <stmt_list>
-(- 1)
 (- 1 2)
 ; 34. <action> -> DIV_T <stmt> <stmt_list>
-(/ 1)
 (/ 1 2)
 ; 35. <action> -> MULT_T <stmt_list>
-(*)
-(* 1)
+
 (* 1 2)
 ; 36. <action> -> EQUALTO_T <stmt_list> 
-(=)
-(= 1)
+
+
 (= 1 2)
 ; 37. <action> -> GT_T <stmt_list>
-(>)
-(> 1)
+
 (> 1 2)
 ; 38. <action> -> LT_T <stmt_list>
-(<)
-(< 1)
+
+
 (< 1 2)
 ; 39. <action> -> GTE_T <stmt_list>
-(>=)
-(>= 1)
+
+
 (>= 1 2)
 ; 40. <action> -> LTE_T <stmt_list>
-(<=)
-(<= 1)
+
+
 (<= 1 2)
 ; 41. <action> -> SYMBOL_T <stmt_list>
-(a)
 (a 1)
 (a 1 2)
 
-
-; handle if inside of main
-(if (> a 2) (= a 10) (= b 5) )

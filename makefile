@@ -1,8 +1,8 @@
 P3.out : Project3.o SetLimits.o LexicalAnalyzer.o SyntacticalAnalyzer.o CodeGen.o
-	g++ -g -o P3.out Project2.o SetLimits.o LexicalAnalyzer.o SyntacticalAnalyzer.o
+	g++ -g -o P3.out Project3.o SetLimits.o LexicalAnalyzer.o SyntacticalAnalyzer.o
 
-Project3.o : Project2.cpp SetLimits.h SyntacticalAnalyzer.h
-	g++ -g -c Project2.cpp
+Project3.o : Project3.cpp SetLimits.h SyntacticalAnalyzer.h
+	g++ -g -c Project3.cpp
 
 SetLimits.o : SetLimits.cpp SetLimits.h
 	g++ -g -c SetLimits.cpp
@@ -19,15 +19,15 @@ SyntacticalAnalyzer.o : SyntacticalAnalyzer.cpp SyntacticalAnalyzer.h LexicalAna
 clean : 
 	rm *.o P3.out *.gch *.dbg *lst
 
-submit : Project2.cpp LexicalAnalyzer.h LexicalAnalyzer.cpp SyntacticalAnalyzer.h SyntacticalAnalyzer.cpp makefile README.txt
-	rm -rf ylnP2
-	mkdir ylnP2
-	cp Project2.cpp ylnP2
-	cp LexicalAnalyzer.h ylnP2
-	cp LexicalAnalyzer.cpp ylnP2
-	cp SyntacticalAnalyzer.h ylnP2
-	cp SyntacticalAnalyzer.cpp ylnP2
-	cp makefile ylnP2
-	cp README.txt ylnP2
-	tar cfvz ylnP2.tgz ylnP2
-	cp ylnP2.tgz ~tiayln/cs460drop
+submit : Project3.cpp LexicalAnalyzer.h LexicalAnalyzer.cpp SyntacticalAnalyzer.h SyntacticalAnalyzer.cpp makefile README.txt
+	rm -rf ylnP3
+	mkdir ylnP3
+	cp Project3.cpp ylnP3
+	cp LexicalAnalyzer.h ylnP3
+	cp LexicalAnalyzer.cpp ylnP3
+	cp SyntacticalAnalyzer.h ylnP3
+	cp SyntacticalAnalyzer.cpp ylnP3
+	cp makefile ylnP3
+	cp README.txt ylnP3
+	tar cfvz ylnP3.tgz ylnP3
+	cp ylnP3.tgz ~tiayln/cs460drop

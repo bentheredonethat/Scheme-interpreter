@@ -448,6 +448,7 @@ int SyntacticalAnalyzer::Action(){
 					operation = lex->GetLexeme();
 					if (token == AND_T) operation = "&&";
 					if (token == OR_T) operation = "||";
+					if (token == EQUALTO_T) operation = "==";
 					
 					token = lex->GetToken();
 					// if empty then done

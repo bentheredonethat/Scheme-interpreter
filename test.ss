@@ -24,9 +24,16 @@
 (define (aa c) c)
 (define (ab ) 1)
 (define (ac ) '1)
+(define (funky p1 p2) (if (and p1 p2) p1 p2))
+
+
+(= 1 2)
 
 ; 18. <action> -> CAR_T <stmt> -- tested
 (car 'a)
+(car '(1 2) )
+(car '(1 a) )
+(car '( a b) )
 ; 19. <action> -> CDR_T <stmt> -- tested
 (cdr 'a)
 ; 20. <action> -> CONS_T <stmt> <stmt> 

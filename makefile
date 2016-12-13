@@ -4,11 +4,14 @@ P3.out : Project3.o SetLimits.o LexicalAnalyzer.o SyntacticalAnalyzer.o CodeGen.
 Project3.o : Project3.cpp SetLimits.h SyntacticalAnalyzer.h
 	g++ -g -c Project3.cpp
 
+CodeGen.o : CodeGen.cpp
+	g++ -g -c CodeGen.cpp -std=c++11 SetLimits.o
+
+
 SetLimits.o : SetLimits.cpp SetLimits.h
 	g++ -g -c SetLimits.cpp
 
-CodeGen.o : CodeGen.cpp
-	g++ -g -c CodeGen.cpp -std=c++11
+
 
 LexicalAnalyzer.o : LexicalAnalyzer.cpp LexicalAnalyzer.h
 	g++ -g -c LexicalAnalyzer.cpp

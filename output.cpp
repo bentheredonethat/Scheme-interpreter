@@ -27,6 +27,17 @@ Object ac( ){
 	return Object("1");
 }
 
+Object funky( Object p1, Object p2){
+	if(p1 && p2){
+		return p1;
+	}
+ 
+	else{
+		return p2;
+	}
+ 
+}
+
 int main(){
 	cout << Object(5) << endl;
 	cout << Object("a") << endl;
@@ -58,7 +69,7 @@ int main(){
 	cout << (Object(1) - Object(2)) << endl;
 	cout << (Object(1) / Object(2)) << endl;
 	cout << (Object(1) * Object(2)) << endl;
-	cout << (Object(1) = Object(2)) << endl;
+	cout << (Object(1) == Object(2)) << endl;
 	cout << (Object(1) > Object(2)) << endl;
 	cout << (Object(1) < Object(2)) << endl;
 	cout << (Object(1) >= Object(2)) << endl;

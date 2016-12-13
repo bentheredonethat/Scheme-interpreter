@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include "SetLimits.h"
 #include <fstream>
 using namespace std;
 class CodeGen{
@@ -8,7 +9,7 @@ class CodeGen{
 public:
 	// constructor for CodeGen class
 	CodeGen(string filename){ // assume .ss file from syntax analyzer
-
+		SetLimits();
 		// check validity of input
 		if (filename.size() == 0) {
 			cout << "invalid input file" << endl;

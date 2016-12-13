@@ -287,6 +287,7 @@ int SyntacticalAnalyzer::Literal ()
 		// rule 8
 		generator->beginLit();
 		generator->quote();
+		generator->writeOpenParen();
 		stmtListFlag = 1;
 		parenCount +=1;
 		lex->debug << "in quoted lit";
@@ -294,6 +295,7 @@ int SyntacticalAnalyzer::Literal ()
 		quotedLitFlag = true;
 		errors += Quoted_Literal();	
 		quotedLitFlag = false;
+		generator->writeCloseParen();
 		generator->quote();
 		stmtListFlag = 3;
 		parenCount -=1;

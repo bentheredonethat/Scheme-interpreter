@@ -1,4 +1,6 @@
-(car '(a) )
+(car '(a b) )
 (car '(1 2) )
-; (car '(1 a) )
+(car '(1 a) )
 (car '( a b) )
+(car '( (d) a b c  ) )
+(cons '( (d) ) '( a b c  ) )

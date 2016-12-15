@@ -42,9 +42,13 @@ int main(){
 	cout << Object(5) << endl;
 	cout << Object("a") << endl;
 	cout << Object("aa") << endl;
-	cout << Object("a b") << endl;
-	cout << Object("a 1 2 a") << endl;
+	cout << Object("(a b)") << endl;
+	cout << Object("(a 1 2 a)") << endl;
+	cout << (Object(1) == Object(2)) << endl;
 	cout << (car(Object("a"))) << endl;
+	cout << (car(Object("(1 2)"))) << endl;
+	cout << (car(Object("(1 a)"))) << endl;
+	cout << (car(Object("(a b)"))) << endl;
 	cout << (cdr(Object("a"))) << endl;
 	cout << (cons(Object(1), Object("a"))) << endl;
 	cout << (Object(1) && Object(2)) << endl;
